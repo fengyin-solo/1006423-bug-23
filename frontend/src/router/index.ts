@@ -6,6 +6,7 @@ const Pit = () => import('@/views/pit/index.vue')
 const Incinerator = () => import('@/views/incinerator/index.vue')
 const Boiler = () => import('@/views/boiler/index.vue')
 const Turbine = () => import('@/views/turbine/index.vue')
+const TurbineDetail = () => import('@/views/turbine/detail.vue')
 const Fluegas = () => import('@/views/fluegas/index.vue')
 const Cems = () => import('@/views/cems/index.vue')
 const Flyash = () => import('@/views/flyash/index.vue')
@@ -29,6 +30,7 @@ const router = createRouter({
     { path: '/incinerator', name: 'incinerator', component: Incinerator },
     { path: '/boiler', name: 'boiler', component: Boiler },
     { path: '/turbine', name: 'turbine', component: Turbine },
+    { path: '/turbine/:id', name: 'turbine-detail', component: TurbineDetail },
     { path: '/fluegas', name: 'fluegas', component: Fluegas },
     { path: '/cems', name: 'cems', component: Cems },
     { path: '/flyash', name: 'flyash', component: Flyash },

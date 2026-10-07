@@ -46,6 +46,7 @@
           <td v-for="column in columns" :key="column">{{ row[column] ?? '—' }}</td>
           <td>{{ row.status }}</td>
           <td class="row-actions">
+            <RouterLink class="link" :to="`/turbine/${row.id}`">详情</RouterLink>
             <button
               v-for="action in actions"
               :key="action"
@@ -75,23 +76,30 @@ import { computed, onMounted, ref } from 'vue'
 
 import {
   downloadEntries,
-  listEntries,
+  listTurbineUnits,
   moduleMeta,
   runAction as applyAction,
 } from '@/api/local-service'
 import type { EntryRow } from '@/data/types'
 
 const meta = moduleMeta('turbine')
-const columns = ["机组编号", "机组转速", "发电功率", "上网电量", "厂用电量", "运行班次", "记录时间", "机组状态"]
+const columns = ["机组编号", "机组转速", "发电功率", "上网电量", "厂用电量", "运行班次", "记录时间", "并网时间", "解列时间", "本次运行时长", "机组状态"]
 const actions = ["提交并网", "登记解列", "上报故障"]
 const statuses = ["待并网", "运行中", "已解列", "故障停机"]
-const stats = [{"label": "运行中机组", "value": 0}, {"label": "已解列机组", "value": 0}, {"label": "故障停机机组", "value": 0}]
 
 const rows = ref<EntryRow[]>([])
 const total = ref(0)
 const errorMessage = ref('')
 const filters = ref<Record<string, string>>({})
 const filterFields = columns.slice(0, 3)
+// 统计卡片与状态分布都按机组口径算（同一机组只算一台，以最近一次解列记录为准），
+// 故障停机的机组不会再夹在运行中里重复计数。
+const stats = computed(() =>
+  ["运行中", "已解列", "故障停机"].map((status) => ({
+    label: `${status}机组`,
+    value: rows.value.filter((row) => String(row.status) === status).length,
+  })),
+)
 const statusSummary = computed(() =>
   statuses.map((status: string) => ({
     status,
@@ -125,7 +133,7 @@ function runAction(action: string, row: EntryRow) {
 function reload() {
   errorMessage.value = ''
   try {
-    const payload = listEntries(meta.key, filters.value)
+    const payload = listTurbineUnits(filters.value)
     rows.value = payload.items
     total.value = payload.total
   } catch (error) {
